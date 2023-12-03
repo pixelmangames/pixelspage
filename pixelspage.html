@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixels Gaming</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(45deg, #1a1a1a, #000000, #1a1a1a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite, fadeIn 2s ease;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        header {
+            padding: 15px;
+            background-color: #000;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+
+        nav {
+            margin-top: 10px;
+            background-color: #333;
+            padding: 10px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 14px;
+            padding: 8px 16px;
+            margin: 0 8px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #555;
+        }
+
+        section {
+            display: none;
+            margin: 10px 0;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        section.active {
+            display: block;
+        }
+
+        button {
+            font-size: 14px;
+            padding: 10px 20px;
+            margin: 8px;
+        }
+
+        canvas {
+            border: 2px solid #00ffcc;
+            border-radius: 10px;
+            margin-top: 15px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Pixels Gaming</h1>
+        <p>Creado por Fabián (z.c0)</p>
+        <p>Contacto: <a href="mailto:azasin8990@gmail.com">azasin8990@gmail.com</a></p>
+    </header>
+
+    <nav>
+        <a href="#consejos" onclick="showSection('consejos')">Consejos</a>
+        <a href="#juego" onclick="showSection('juego')">Juego de la Viborita</a>
+    </nav>
+
+    <section id="consejos" class="active">
+        <h2>Consejos para Gaming</h2>
+        <p>Descubre consejos y trucos para mejorar tu experiencia de juego. Desde estrategias en juegos hasta recomendaciones de hardware, ¡aquí encontrarás información útil para potenciar tu rendimiento!</p>
+
+        <h3>Super Meat Boy</h3>
+        <ul>
+            <li><strong>Domina los controles:</strong> Practica los movimientos y saltos para familiarizarte con los controles precisos.</li>
+            <li><strong>Observa patrones:</strong> Algunos niveles tienen patrones específicos. Observa y aprende para mejorar tu tiempo.</li>
+            <li><strong>Experimenta con personajes:</strong> Cada personaje tiene habilidades únicas. Experimenta para encontrar el que se adapte a tu estilo.</li>
+            <li><strong>Toma descansos:</strong> Super Meat Boy puede ser frustrante. Tómate descansos para evitar la fatiga y mantener la concentración.</li>
+            <li><strong>Mantén la calma:</strong> La paciencia es clave. No te desanimes por los desafíos; cada intento es una oportunidad de aprendizaje.</li>
+            <li><strong>Explora secretos:</strong> Busca áreas secretas y pasadizos para descubrir recompensas y atajos.</li>
+        </ul>
+
+        <h3>Metal Gear Solid 3: Snake Eater</h3>
+        <ul>
+            <li><strong>Camuflaje y entorno:</strong> Ajusta tu camuflaje según el entorno para evitar ser detectado por los enemigos.</li>
+            <!-- Otros consejos para Metal Gear Solid 3: Snake Eater -->
+        </ul>
+    </section>
+
+    <section id="juego">
+        <h2>Juego de la Viborita</h2>
+        <p>Puntuación: <span id="score">0</span></p>
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <div id="game-controls">
+            <button id="start-game-btn" onclick="startGame()">Iniciar Juego</button>
+            <button onclick="changeDirection('up')">↑</button>
+            <button onclick="changeDirection('left')">←</button>
+            <button onclick="changeDirection('down')">↓</button>
+            <button onclick="changeDirection('right')">→</button>
+        </div>
+    </section>
+
+    <script>
+        var canvas = document.getElementById("snakeCanvas");
+        var ctx = canvas.getContext("2d");
+        var gridSize = 20;
+        var snake = [{ x: 4, y: 4 }];
+        var direction = "right";
+        var food = getRandomFood();
+        var score = 0;
+        var gameInterval;
+
+        function showSection(sectionId) {
+            var sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        function startGame() {
+            snake = [{ x: 4, y: 4 }];
+            direction = "right";
+            food = getRandomFood();
+            score = 0;
+            updateScore();
+            clearInterval(gameInterval);
+            gameInterval = setInterval(updateGame, 150);
+        }
+
+        function updateGame() {
+            clearCanvas();
+            moveSnake();
+            drawSnake();
+            drawFood();
+            checkCollision();
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function moveSnake() {
+            var head = Object.assign({}, snake[0]);
+            switch (direction) {
+                case "up":
+                    head.y -= 1;
+                    break;
+                case "down":
+                    head.y += 1;
+                    break;
+                case "left":
+                    head.x -= 1;
+                    break;
+                case "right":
+                    head.x += 1;
+                    break;
+            }
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                updateScore();
+                food = getRandomFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function drawSnake() {
+            ctx.fillStyle = "#00ffcc";
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = "#ff8c00";
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function checkCollision() {
+            var head = snake[0];
+
+            if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
+                clearInterval(gameInterval);
+                alert("¡Game Over! Tu puntuación es: " + score);
+            }
+
+            for (var i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    clearInterval(gameInterval);
+                    alert("¡Game Over! Tu puntuación es: " + score);
+                }
+            }
+        }
+
+        function getRandomFood() {
+            return {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                y: Math.floor(Math.random() * (canvas.height / gridSize))
+            };
+        }
+
+        function updateScore() {
+            document.getElementById("score").textContent = score;
+        }
+
+        function changeDirection(newDirection) {
+            if (
+                (newDirection === "up" && direction !== "down") ||
+                (newDirection === "down" && direction !== "up") ||
+                (newDirection === "left" && direction !== "right") ||
+                (newDirection === "right" && direction !== "left")
+            ) {
+                direction = newDirection;
+            }
+        }
+    </script>
+</body>
+
+</html>
